@@ -1,33 +1,44 @@
 package com.sena.schedule.DTO;
 
+import java.time.LocalDateTime;
+
 public class reminderDTO {
+    private Integer doseID;
+    private LocalDateTime sendAt;
+    private Boolean status;
 
-    private int doseID;
-    private String sendAt;
-    private boolean status;
+    public reminderDTO() {
+    }
 
-    public reminderDTO(int doseID, String sendAt, boolean status) {
+    public reminderDTO(Integer doseID, LocalDateTime sendAt, Boolean status) {
         this.doseID = doseID;
         this.sendAt = sendAt;
         this.status = status;
     }
 
-    public int getDoseID() {
+    public Integer getDoseID() {
         return doseID;
     }
-    public void setDoseID(int doseID) {
+
+    public void setDoseID(Integer doseID) {
         this.doseID = doseID;
     }
-    public String getSendAt() {
+
+    public LocalDateTime getSendAt() {
         return sendAt;
     }
-    public void setSendAt(String sendAt) {
+
+    public void setSendAt(LocalDateTime sendAt) {
         this.sendAt = sendAt;
     }
-    public boolean isStatus() {
+
+    public Boolean getStatus() {
         return status;
     }
-    public void setStatus(boolean status) {
+
+    public void setStatus(Boolean status) {
         this.status = status;
     }
+
+    
 }

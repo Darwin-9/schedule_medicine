@@ -1,18 +1,13 @@
 package com.sena.schedule.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
-@Entity(name="medicament")
-public class medicament {
-
+@Entity(name="medication")
+public class medication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="medicamentID")
-    private int medicamentID;
+    @Column(name="medicationID")
+    private int medicationID;
 
     @Column(name="name", nullable=false, length=50)
     private String name;
@@ -23,42 +18,33 @@ public class medicament {
     @Column(name="frequencyHours", nullable=false)
     private int frequencyHours;
 
-    public medicament(){
-
+    
+    public medication() {
     }
-
-    public medicament(int medicamentID, String name, String dosage, int frequencyHours){
-        this.medicamentID = medicamentID;
+    public medication(int medicationID, String name, String dosage, int frequencyHours) {
+        this.medicationID = medicationID;
         this.name = name;
         this.dosage = dosage;
         this.frequencyHours = frequencyHours;
-
     }
-
-    public int getMedicamentID() {
-        return medicamentID;
+    public int getMedicationID() {
+        return medicationID;
     }
-
+    public void setMedicationID(int medicationID) {
+        this.medicationID = medicationID;
+    }
     public String getName() {
         return name;
     }
-
-    public String getDosage() {
-        return dosage;
-    }
-
-    public void setMedicamentID(int medicamentID) {
-        this.medicamentID = medicamentID;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
-
+    public String getDosage() {
+        return dosage;
+    }
     public void setDosage(String dosage) {
         this.dosage = dosage;
     }
-    
     public int getFrequencyHours() {
         return frequencyHours;
     }
@@ -67,5 +53,4 @@ public class medicament {
     }
 
     
-
 }

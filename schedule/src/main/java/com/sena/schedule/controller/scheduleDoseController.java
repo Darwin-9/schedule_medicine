@@ -1,71 +1,76 @@
 package com.sena.schedule.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.sena.schedule.DTO.scheduleDoseDTO;
+import com.sena.schedule.DTO.responseDTO;
+import com.sena.schedule.service.scheduleDoseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.sena.schedule.model.scheduleDose;
-import com.sena.schedule.DTO.scheduleDoseDTO;
-import com.sena.schedule.DTO.responseDTO;
-import com.sena.schedule.service.scheduleDoseService;
-
+/**
+ * Controlador REST para la gestión de dosis agendadas.
+ */
 @RestController
-@RequestMapping("/api/v1/schedule-doses")
+@RequestMapping("/api/scheduledoses")
 public class scheduleDoseController {
 
     @Autowired
-    private scheduleDoseService scheduleDoseService;
+    private scheduleDoseService service;
 
-    // Create a new schedule dose
-    @PostMapping("/")
-    public ResponseEntity<responseDTO> create(@RequestBody scheduleDoseDTO scheduleDoseDTO) {
-        responseDTO response = scheduleDoseService.save(scheduleDoseDTO);
-        if (response.getStatus().equals(HttpStatus.OK.toString())) {
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
+    /**
+     * Crea una nueva dosis agendada.
+     */
+    @PostMapping
+    public ResponseEntity<responseDTO> save(@RequestBody scheduleDoseDTO dto) {
+        responseDTO response = service.save(dto);
+        HttpStatus status = response.getStatus().equals("OK") ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(response, status);
     }
 
-    // Get all schedule doses
-    @GetMapping("/")
-    public ResponseEntity<List<scheduleDose>> getAll() {
-        return new ResponseEntity<>(scheduleDoseService.findAll(), HttpStatus.OK);
+    /**
+     * Lista todas las dosis agendadas.
+     */
+    @GetMapping
+    public ResponseEntity<List<scheduleDoseDTO>> findAll() {
+        List<scheduleDoseDTO> doses = service.findAll();
+        return new ResponseEntity<>(doses, HttpStatus.OK);
     }
 
-    // Get schedule dose by ID
+    /**
+     * Busca una dosis agendada por su ID.
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getById(@PathVariable int id) {
-        Optional<scheduleDose> dose = scheduleDoseService.findById(id);
-        if (!dose.isPresent()) {
-            return new ResponseEntity<>(
-                new responseDTO(HttpStatus.NOT_FOUND.toString(), "Dosis programada no encontrada"), 
-                HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> findById(@PathVariable int id) {
+        Optional<scheduleDoseDTO> dto = service.findById(id);
+        if (dto.isPresent()) {
+            return new ResponseEntity<>(dto.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(new responseDTO("NOT_FOUND", "Dosis agendada no existe"), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(dose.get(), HttpStatus.OK);
     }
 
-    // Update schedule dose
+    /**
+     * Actualiza una dosis agendada existente.
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<responseDTO> update(@PathVariable int id, @RequestBody scheduleDoseDTO scheduleDoseDTO) {
-        responseDTO response = scheduleDoseService.update(id, scheduleDoseDTO);
-        if (response.getStatus().equals(HttpStatus.OK.toString())) {
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<responseDTO> update(@PathVariable int id, @RequestBody scheduleDoseDTO dto) {
+        responseDTO response = service.update(id, dto);
+        HttpStatus status = response.getStatus().equals("OK") ? HttpStatus.OK :
+                response.getStatus().equals("NOT_FOUND") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(response, status);
     }
 
-    // Delete schedule dose
+    /**
+     * Elimina una dosis agendada por su ID.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<responseDTO> delete(@PathVariable int id) {
-        responseDTO response = scheduleDoseService.delete(id);
-        if (response.getStatus().equals(HttpStatus.OK.toString())) {
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        responseDTO response = service.delete(id);
+        HttpStatus status = response.getStatus().equals("OK") ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(response, status);
     }
 }

@@ -1,56 +1,64 @@
 package com.sena.schedule.DTO;
 
-public class scheduleDoseDTO {
+import java.time.LocalDateTime;
 
-    private int medicationID;
-    private int patientID;
-    private String startDate;
-    private boolean isConfirmed;
-    private int durationDays;
-   
-    public scheduleDoseDTO(int medicationID, int patientID, String startDate, boolean isConfirmed, int durationDays) {
+public class scheduleDoseDTO {
+    private Integer medicationID;
+    private Integer patientID;
+    private LocalDateTime startDate;
+    private Integer confirmationStatus; // 0=pending, 1=confirmed, 2=not taken
+    private Integer durationDays;
+
+    public scheduleDoseDTO() {
+    }
+
+    public scheduleDoseDTO(Integer medicationID, Integer patientID, LocalDateTime startDate, Integer confirmationStatus, Integer durationDays) {
         this.medicationID = medicationID;
         this.patientID = patientID;
         this.startDate = startDate;
-        this.isConfirmed = isConfirmed;
+        this.confirmationStatus = confirmationStatus;
         this.durationDays = durationDays;
     }
 
-    public int getMedicationID() {
+    public Integer getMedicationID() {
         return medicationID;
     }
-    public void setMedicationID(int medicationID) {
+
+    public void setMedicationID(Integer medicationID) {
         this.medicationID = medicationID;
     }
 
-    public int getPatientID() {
+    public Integer getPatientID() {
         return patientID;
     }
-    public void setPatientID(int patientID) {
+
+    public void setPatientID(Integer patientID) {
         this.patientID = patientID;
     }
 
-    public String getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
-    public void setStartDate(String startDate) {
+
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public boolean isConfirmed() {
-        return isConfirmed;
-    }
-    public void setConfirmed(boolean isConfirmed) {
-        this.isConfirmed = isConfirmed;
+    public Integer getConfirmationStatus() {
+        return confirmationStatus;
     }
 
-    public int getDurationDays() {
+    public void setConfirmationStatus(Integer confirmationStatus) {
+        this.confirmationStatus = confirmationStatus;
+    }
+
+    public Integer getDurationDays() {
         return durationDays;
     }
-    public void setDurationDays(int durationDays) {
+
+    public void setDurationDays(Integer durationDays) {
         this.durationDays = durationDays;
     }
 
     
-
 }

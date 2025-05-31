@@ -1,146 +1,112 @@
 package com.sena.schedule.service;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Optional;
-
+import com.sena.schedule.DTO.scheduleDoseDTO;
+import com.sena.schedule.DTO.responseDTO;
+import com.sena.schedule.model.scheduleDose;
+import com.sena.schedule.model.patient;
+import com.sena.schedule.model.medication;
+import com.sena.schedule.repository.IScheduleDose;
+import com.sena.schedule.repository.IPatient;
+import com.sena.schedule.repository.IMedication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import com.sena.schedule.DTO.responseDTO;
-import com.sena.schedule.DTO.scheduleDoseDTO;
-import com.sena.schedule.model.medicament;
-import com.sena.schedule.model.patient;
-import com.sena.schedule.model.scheduleDose;
-import com.sena.schedule.repository.IMedicament;
-import com.sena.schedule.repository.IPatient;
-import com.sena.schedule.repository.IScheduleDose;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class scheduleDoseService {
 
     @Autowired
-    private IScheduleDose scheduleDoseRepository;
-
+    private IScheduleDose scheduleDoseRepo;
     @Autowired
-    private IPatient patientRepository;
-
+    private IPatient patientRepo;
     @Autowired
-    private IMedicament medicamentRepository;
+    private IMedication medicationRepo;
 
-    public responseDTO save(scheduleDoseDTO scheduleDoseDTO) {
-        try {
-            Optional<patient> patient = patientRepository.findById(scheduleDoseDTO.getPatientID());
-            if (!patient.isPresent()) {
-                return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "El paciente especificado no existe");
-            }
-
-            Optional<medicament> medication = medicamentRepository.findById(scheduleDoseDTO.getMedicationID());
-            if (!medication.isPresent()) {
-                return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "El medicamento especificado no existe");
-            }
-
-            // Validate and parse timestamp
-            Timestamp startDate = parseTimestamp(scheduleDoseDTO.getStartDate());
-            if (startDate == null) {
-                return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "Formato de fecha inválido. Use yyyy-MM-dd HH:mm:ss");
-            }
-
-            if (scheduleDoseDTO.getDurationDays() <= 0) {
-                return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "La duración en días debe ser mayor a 0");
-            }
-
-            scheduleDose newDose = new scheduleDose();
-            newDose.setPatientID(patient.get());
-            newDose.setMedicationID(medication.get());
-            newDose.setStartDate(startDate);
-            newDose.setConfirmed(scheduleDoseDTO.isConfirmed());
-            newDose.setDurationDays(scheduleDoseDTO.getDurationDays());
-
-            scheduleDoseRepository.save(newDose);
-
-            return new responseDTO(HttpStatus.OK.toString(), "Dosis programada creada exitosamente");
-        } catch (Exception e) {
-            return new responseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error al crear la dosis programada: " + e.getMessage());
-        }
+    /**
+     * Guarda una nueva dosis agendada luego de validar datos y existencia de paciente y medicamento.
+     */
+    public responseDTO save(scheduleDoseDTO dto) {
+        Optional<patient> p = patientRepo.findById(dto.getPatientID());
+        Optional<medication> m = medicationRepo.findById(dto.getMedicationID());
+        if (p.isEmpty() || m.isEmpty()) return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "Paciente o medicamento no existe");
+        if (dto.getStartDate() == null || dto.getDurationDays() == null || dto.getDurationDays() <= 0)
+            return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "Datos de la dosis incompletos");
+        scheduleDose sd = convertToModel(dto, m.get(), p.get());
+        scheduleDoseRepo.save(sd);
+        return new responseDTO(HttpStatus.OK.toString(), "Dosis agendada correctamente");
     }
 
-    public List<scheduleDose> findAll() {
-        return scheduleDoseRepository.findAll();
+    /**
+     * Retorna todas las dosis agendadas como DTOs.
+     */
+    public List<scheduleDoseDTO> findAll() {
+        return scheduleDoseRepo.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<scheduleDose> findById(int id) {
-        return scheduleDoseRepository.findById(id);
+    /**
+     * Busca una dosis agendada por su ID y la retorna como DTO.
+     */
+    public Optional<scheduleDoseDTO> findById(int id) {
+        return scheduleDoseRepo.findById(id).map(this::convertToDTO);
     }
 
-    public responseDTO update(int id, scheduleDoseDTO scheduleDoseDTO) {
-        try {
-            Optional<scheduleDose> doseOpt = scheduleDoseRepository.findById(id);
-            if (!doseOpt.isPresent()) {
-                return new responseDTO(HttpStatus.NOT_FOUND.toString(), "Dosis programada no encontrada");
-            }
-
-            scheduleDose existingDose = doseOpt.get();
-
-            if (scheduleDoseDTO.getPatientID() != 0 && 
-                existingDose.getPatientID().getPatientID() != scheduleDoseDTO.getPatientID()) {
-                Optional<patient> patient = patientRepository.findById(scheduleDoseDTO.getPatientID());
-                if (!patient.isPresent()) {
-                    return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "El paciente especificado no existe");
-                }
-                existingDose.setPatientID(patient.get());
-            }
-
-            if (scheduleDoseDTO.getMedicationID() != 0 && 
-                existingDose.getMedicationID().getMedicamentID() != scheduleDoseDTO.getMedicationID()) {
-                Optional<medicament> medication = medicamentRepository.findById(scheduleDoseDTO.getMedicationID());
-                if (!medication.isPresent()) {
-                    return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "El medicamento especificado no existe");
-                }
-                existingDose.setMedicationID(medication.get());
-            }
-
-            // Update start date if changed
-            if (scheduleDoseDTO.getStartDate() != null && !scheduleDoseDTO.getStartDate().isEmpty()) {
-                Timestamp startDate = parseTimestamp(scheduleDoseDTO.getStartDate());
-                if (startDate == null) {
-                    return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "Formato de fecha inválido. Use yyyy-MM-dd HH:mm:ss");
-                }
-                existingDose.setStartDate(startDate);
-            }
-
-            existingDose.setConfirmed(scheduleDoseDTO.isConfirmed());
-
-            if (scheduleDoseDTO.getDurationDays() > 0) {
-                existingDose.setDurationDays(scheduleDoseDTO.getDurationDays());
-            }
-
-            scheduleDoseRepository.save(existingDose);
-            return new responseDTO(HttpStatus.OK.toString(), "Dosis programada actualizada correctamente");
-        } catch (Exception e) {
-            return new responseDTO(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error al actualizar la dosis programada: " + e.getMessage());
-        }
+    /**
+     * Actualiza una dosis agendada.
+     */
+    public responseDTO update(int id, scheduleDoseDTO dto) {
+        Optional<scheduleDose> opt = scheduleDoseRepo.findById(id);
+        if (opt.isEmpty()) return new responseDTO(HttpStatus.NOT_FOUND.toString(), "Dosis no encontrada");
+        Optional<patient> p = patientRepo.findById(dto.getPatientID());
+        Optional<medication> m = medicationRepo.findById(dto.getMedicationID());
+        if (p.isEmpty() || m.isEmpty()) return new responseDTO(HttpStatus.BAD_REQUEST.toString(), "Paciente o medicamento no existe");
+        scheduleDose sd = opt.get();
+        sd.setMedication(m.get());
+        sd.setPatient(p.get());
+        sd.setStartDate(dto.getStartDate());
+        sd.setConfirmationStatus(dto.getConfirmationStatus());
+        sd.setDurationDays(dto.getDurationDays());
+        scheduleDoseRepo.save(sd);
+        return new responseDTO(HttpStatus.OK.toString(), "Dosis agendada actualizada correctamente");
     }
 
+    /**
+     * Elimina una dosis agendada por su ID.
+     */
     public responseDTO delete(int id) {
-        Optional<scheduleDose> dose = scheduleDoseRepository.findById(id);
-        if (!dose.isPresent()) {
-            return new responseDTO(HttpStatus.NOT_FOUND.toString(), "Dosis programada no encontrada");
-        }
-
-        scheduleDoseRepository.deleteById(id);
-        return new responseDTO(HttpStatus.OK.toString(), "Dosis programada eliminada correctamente");
+        if (!scheduleDoseRepo.existsById(id)) return new responseDTO(HttpStatus.NOT_FOUND.toString(), "Dosis no existe");
+        scheduleDoseRepo.deleteById(id);
+        return new responseDTO(HttpStatus.OK.toString(), "Dosis agendada eliminada correctamente");
     }
 
-    private Timestamp parseTimestamp(String timestampStr) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return new Timestamp(dateFormat.parse(timestampStr).getTime());
-        } catch (ParseException e) {
-            return null;
-        }
+    /**
+     * Convierte un scheduleDoseDTO a un modelo scheduleDose.
+     */
+    public scheduleDose convertToModel(scheduleDoseDTO dto, medication med, patient pat) {
+        scheduleDose sd = new scheduleDose();
+        sd.setMedication(med);
+        sd.setPatient(pat);
+        sd.setStartDate(dto.getStartDate());
+        sd.setConfirmationStatus(dto.getConfirmationStatus());
+        sd.setDurationDays(dto.getDurationDays());
+        return sd;
+    }
+
+    /**
+     * Convierte un modelo scheduleDose a un DTO scheduleDoseDTO.
+     */
+    public scheduleDoseDTO convertToDTO(scheduleDose sd) {
+        scheduleDoseDTO dto = new scheduleDoseDTO();
+        dto.setMedicationID(sd.getMedication().getMedicationID());
+        dto.setPatientID(sd.getPatient().getPatientID());
+        dto.setStartDate(sd.getStartDate());
+        dto.setConfirmationStatus(sd.getConfirmationStatus());
+        dto.setDurationDays(sd.getDurationDays());
+        return dto;
     }
 }

@@ -1,4 +1,6 @@
 package com.sena.schedule.service;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,7 +32,8 @@ public class emailService {
         }
     }
 
-    public void advancedEmail(String addressMail) {
+
+   public void advancedEmail(String addressMail) {
         try {
             // destinatario
             // String addressMail = "cjcs.cadenasarasty8@gmail.com";

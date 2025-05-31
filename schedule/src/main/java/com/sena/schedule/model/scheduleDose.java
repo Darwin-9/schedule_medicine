@@ -1,91 +1,92 @@
 package com.sena.schedule.model;
 
-import java.sql.Timestamp;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-@Entity(name="scheduleDose")
+@Entity
+@Table(name = "scheduleDose")
 public class scheduleDose {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="doseID")
-    private int doseID;
+    @Column(name = "doseID", nullable = false)
+    private Integer doseID;
 
     @ManyToOne
-    @JoinColumn(name="medicationID", nullable=false)
-    private medicament medicationID;
+    @JoinColumn(name = "medicationID", nullable = false)
+    private medication medication;
 
     @ManyToOne
-    @JoinColumn(name="patientID", nullable=false)
-    private patient patientID;
+    @JoinColumn(name = "patientID", nullable = false)
+    private patient patient;
 
-    @Column(name="startDate", nullable=false, length=70)
-    private Timestamp startDate;
+    @Column(name = "startDate", nullable = false)
+    private LocalDateTime startDate;
 
-    @Column(name = "isConfirmed", nullable = false, columnDefinition = "boolean default true ")
-    private boolean isConfirmed;
+    @Column(name = "confirmationStatus", nullable = false)
+    private Integer confirmationStatus; // 0=pending, 1=confirmed, 2=not taken
 
-    @Column(name="durationDays", nullable=false)
-    private int durationDays;
+    @Column(name = "durationDays", nullable = false)
+    private Integer durationDays;
 
-    
     public scheduleDose() {
     }
 
-    public scheduleDose(int doseID, medicament medicationID, patient patientID, Timestamp startDate, boolean isConfirmed, int durationDays) {
+    public scheduleDose(Integer doseID, medication medication, patient patient, LocalDateTime startDate, Integer confirmationStatus, Integer durationDays) {
         this.doseID = doseID;
-        this.medicationID = medicationID;
-        this.patientID = patientID;
+        this.medication = medication;
+        this.patient = patient;
         this.startDate = startDate;
-        this.isConfirmed = isConfirmed;
+        this.confirmationStatus = confirmationStatus;
         this.durationDays = durationDays;
     }
-    public int getDoseID() {
+
+    public Integer getDoseID() {
         return doseID;
     }
-    public void setDoseID(int doseID) {
+
+    public void setDoseID(Integer doseID) {
         this.doseID = doseID;
     }
-    public medicament getMedicationID() {
-        return medicationID;
+
+    public medication getMedication() {
+        return medication;
     }
-    public void setMedicationID(medicament medicationID) {
-        this.medicationID = medicationID;
+
+    public void setMedication(medication medication) {
+        this.medication = medication;
     }
-    public patient getPatientID() {
-        return patientID;
+
+    public patient getPatient() {
+        return patient;
     }
-    public void setPatientID(patient patientID) {
-        this.patientID = patientID;
+
+    public void setPatient(patient patient) {
+        this.patient = patient;
     }
-    public Timestamp getStartDate() {
+
+    public LocalDateTime getStartDate() {
         return startDate;
     }
-    public void setStartDate(Timestamp startDate) {
+
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
-    public int getDurationDays() {
+
+    public Integer getConfirmationStatus() {
+        return confirmationStatus;
+    }
+
+    public void setConfirmationStatus(Integer confirmationStatus) {
+        this.confirmationStatus = confirmationStatus;
+    }
+
+    public Integer getDurationDays() {
         return durationDays;
     }
-    public void setDurationDays(int durationDays) {
+
+    public void setDurationDays(Integer durationDays) {
         this.durationDays = durationDays;
     }
 
-    public boolean isConfirmed() {
-        return isConfirmed;
-    }
-
-    public void setConfirmed(boolean isConfirmed) {
-        this.isConfirmed = isConfirmed;
-    }
     
-    
-
 }

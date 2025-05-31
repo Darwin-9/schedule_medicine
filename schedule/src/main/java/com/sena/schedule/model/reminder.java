@@ -1,75 +1,67 @@
 package com.sena.schedule.model;
 
-import java.sql.Timestamp;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-@Entity(name="reminder")
+@Entity
+@Table(name = "reminder")
 public class reminder {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="reminderID")
-    private int patientID;
- 
+    @Column(name = "reminderID", nullable = false)
+    private Integer reminderID;
+
     @ManyToOne
-    @JoinColumn(name="doseID", nullable=false)
-    private scheduleDose dose;
+    @JoinColumn(name = "doseID", nullable = false)
+    private scheduleDose doseID;
 
-    @Column(name="sendAt", nullable=false, length=70, unique=true)
-    private Timestamp sendAt;
+    @Column(name = "sendAt", nullable = false)
+    private LocalDateTime sendAt;
 
-    @Column(name = "status", nullable = false, columnDefinition = "boolean default true ")
-    private boolean status;
+    @Column(name = "status", nullable = false)
+    private Boolean status;
 
     public reminder() {
     }
 
-    public reminder(int patientID, scheduleDose dose, Timestamp sendAt, boolean status) {
-        this.patientID = patientID;
-        this.dose = dose;
+    public reminder(Integer reminderID, scheduleDose doseID, LocalDateTime sendAt, Boolean status) {
+        this.reminderID = reminderID;
+        this.doseID = doseID;
         this.sendAt = sendAt;
         this.status = status;
     }
 
-    public int getPatientID() {
-        return patientID;
+    public Integer getReminderID() {
+        return reminderID;
     }
 
-    public void setPatientID(int patientID) {
-        this.patientID = patientID;
+    public void setReminderID(Integer reminderID) {
+        this.reminderID = reminderID;
     }
 
-    public scheduleDose getDose() {
-        return dose;
+    public scheduleDose getDoseID() {
+        return doseID;
     }
 
-    public void setDose(scheduleDose dose) {
-        this.dose = dose;
+    public void setDoseID(scheduleDose doseID) {
+        this.doseID = doseID;
     }
 
-    public Timestamp getSendAt() {
+    public LocalDateTime getSendAt() {
         return sendAt;
     }
 
-    public void setSendAt(Timestamp sendAt) {
+    public void setSendAt(LocalDateTime sendAt) {
         this.sendAt = sendAt;
     }
 
-    public boolean isStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
     
-
 }

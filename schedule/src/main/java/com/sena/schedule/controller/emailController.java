@@ -7,6 +7,8 @@ import com.sena.schedule.service.emailService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+
+
 @RestController
 public class emailController {
 
@@ -25,5 +27,7 @@ public class emailController {
         emailService.advancedEmail(email);
         return "Mail sent successfully";
     }
+
+
     
 }
