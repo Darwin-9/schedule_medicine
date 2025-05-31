@@ -1,6 +1,8 @@
 package com.sena.schedule.controller;
 
 import com.sena.schedule.DTO.scheduleDoseDTO;
+import com.sena.schedule.model.scheduleDose;
+import com.sena.schedule.repository.IScheduleDose;
 import com.sena.schedule.DTO.responseDTO;
 import com.sena.schedule.service.scheduleDoseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class scheduleDoseController {
 
     @Autowired
     private scheduleDoseService service;
+
+    @Autowired
+    private IScheduleDose scheduleDoseRepo;
 
     /**
      * Crea una nueva dosis agendada.
@@ -73,4 +78,17 @@ public class scheduleDoseController {
         HttpStatus status = response.getStatus().equals("OK") ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         return new ResponseEntity<>(response, status);
     }
+
+    @PutMapping("/{id}/confirm")
+public ResponseEntity<responseDTO> confirmDose(@PathVariable int id) {
+    Optional<scheduleDose> opt = scheduleDoseRepo.findById(id);
+    if (opt.isPresent()) {
+        scheduleDose sd = opt.get();
+        sd.setConfirmationStatus(1); // Confirmado
+        scheduleDoseRepo.save(sd);
+        return ResponseEntity.ok(new responseDTO("OK", "Toma confirmada"));
+    }
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new responseDTO("NOT_FOUND", "Dosis no encontrada"));
+}
+
 }

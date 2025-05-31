@@ -21,14 +21,18 @@ public class reminder {
     @Column(name = "status", nullable = false)
     private Boolean status;
 
+    @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
+
     public reminder() {
     }
 
-    public reminder(Integer reminderID, scheduleDose doseID, LocalDateTime sendAt, Boolean status) {
+    public reminder(Integer reminderID, scheduleDose doseID, LocalDateTime sendAt, Boolean status, boolean active) {
         this.reminderID = reminderID;
         this.doseID = doseID;
         this.sendAt = sendAt;
         this.status = status;
+        this.active = active;
     }
 
     public Integer getReminderID() {
@@ -63,5 +67,11 @@ public class reminder {
         this.status = status;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+    public void setActive(boolean active) {
+        this.active = active;
+    }
     
 }

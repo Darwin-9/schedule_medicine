@@ -2,6 +2,8 @@ package com.sena.schedule.controller;
 
 import com.sena.schedule.DTO.reminderDTO;
 import com.sena.schedule.DTO.responseDTO;
+import com.sena.schedule.model.reminder;
+import com.sena.schedule.repository.IReminder;
 import com.sena.schedule.service.reminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,9 @@ public class reminderController {
 
     @Autowired
     private reminderService service;
+
+    @Autowired
+    private IReminder reminderRepo;
 
     /**
      * Crea un nuevo recordatorio.
@@ -73,4 +78,30 @@ public class reminderController {
         HttpStatus status = response.getStatus().equals("OK") ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         return new ResponseEntity<>(response, status);
     }
+
+    @PutMapping("/{id}/suspend")
+public ResponseEntity<responseDTO> suspend(@PathVariable int id) {
+    Optional<reminder> opt = reminderRepo.findById(id);
+    if (opt.isPresent()) {
+        reminder r = opt.get();
+        r.setActive(false);
+        reminderRepo.save(r);
+        return ResponseEntity.ok(new responseDTO("OK", "Recordatorio suspendido"));
+    }
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new responseDTO("NOT_FOUND", "Recordatorio no existe"));
+}
+
+@PutMapping("/{id}/activate")
+public ResponseEntity<responseDTO> activate(@PathVariable int id) {
+    Optional<reminder> opt = reminderRepo.findById(id);
+    if (opt.isPresent()) {
+        reminder r = opt.get();
+        r.setActive(true);
+        reminderRepo.save(r);
+        return ResponseEntity.ok(new responseDTO("OK", "Recordatorio reactivado"));
+    }
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new responseDTO("NOT_FOUND", "Recordatorio no existe"));
+}
+
+
 }
